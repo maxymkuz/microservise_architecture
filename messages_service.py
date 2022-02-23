@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-
+from pyconfig import MESSAGES_PORT
 app = Flask(__name__)
 
 
@@ -10,4 +10,4 @@ def add():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=MESSAGES_PORT)

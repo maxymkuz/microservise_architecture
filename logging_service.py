@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-
+from pyconfig import LOGGING_PORT
 app = Flask(__name__)
 
 local_hash_table = {}
@@ -17,7 +17,7 @@ def add():
     elif request.method == 'POST':
         # TODO handle exception here maybe?
         data = request.get_json()
-        uuid = int(data["UUID"])
+        uuid = data["UUID"]
         msg = data["msg"]
         local_hash_table[uuid] = msg
         print(msg)
@@ -25,4 +25,5 @@ def add():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # print(LOGGING_PORT)
+    app.run(debug=True, port=LOGGING_PORT)
