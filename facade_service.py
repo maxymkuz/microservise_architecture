@@ -12,20 +12,16 @@ def add():
     if request.method == 'GET':
         logging_reqs = requests.get(f'http://127.0.0.1:{LOGGING_PORT}/')
         msgs_reqs = requests.get(f'http://127.0.0.1:{MESSAGES_PORT}/')
-
-
-        # print(msgs_reqs.json())
-
+        # print(logging_reqs.json())
+        # print(type(logging_reqs.json()))
         lst_logging_str = ','.join(logging_reqs.json())
-        # lst_logging_str = ','
-        # TODO change the messaging_service to get jsonify
+        msgs_reqs_str = msgs_reqs.content.decode('ascii')
 
-        msgs_reqs_str = ''
         res_str = f'LOGGING: {lst_logging_str}\n MESSAGES_REQ: {msgs_reqs_str}'
         print(res_str)
 
-        return '<p>Logging: ' + logging_reqs.content.decode('ascii') + '</p>'
-               # '<p>Msgs:' + logging_reqs.content.decode('ascii') + '</p>'
+        return '<p>Logging: ' + logging_reqs.content.decode('ascii') + '</p>' + \
+               '<p>Msgs:' + msgs_reqs.content.decode('ascii') + '</p>'
     elif request.method == 'POST':
         uuid_ = uuid.uuid1()
 
