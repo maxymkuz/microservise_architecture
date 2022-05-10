@@ -6,7 +6,7 @@ app = Flask(__name__)
 @app.route('/', methods=['GET'])
 def add():
     if request.method == 'GET':
-        return "sample_message", 200
+        return "messages servise message", 200
 
 
 if __name__ == '__main__':

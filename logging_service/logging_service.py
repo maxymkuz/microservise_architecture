@@ -1,12 +1,21 @@
+import hazelcast
+
 from flask import Flask, jsonify, request
-from pyconfig import LOGGING_PORT
 app = Flask(__name__)
 
-local_hash_table = {}
+LOGGING_PORT = 5005
+
+# Connect to Hazelcast cluster.
+client = hazelcast.HazelcastClient()
+
+# Get or create the "distributed-map" on the cluster.
+distributed_map = client.get_map("distributed-map").blocking()
 
 
 def fetch_messages():
-    return jsonify([local_hash_table[uuid] for uuid in local_hash_table])
+    # get all available keys here
+    print(distributed_map.values())
+    return jsonify(list(distributed_map.values()))
 
 
 @app.route('/', methods=['GET', 'POST', 'DELETE', 'PUT'])
@@ -19,11 +28,20 @@ def add():
         data = request.get_json()
         uuid = data["UUID"]
         msg = data["msg"]
-        local_hash_table[uuid] = msg
+        
+        # local_hash_table[uuid] = msg
+        distributed_map.lock(uuid)
+
+        distributed_map.put(uuid, msg)
+
+        distributed_map.unlock(uuid)
+
+
         print(msg)
         return jsonify(msg), 200
 
 
 if __name__ == '__main__':
-    # print(LOGGING_PORT)
-    app.run(debug=True, port=LOGGING_PORT)
+    print("\n\nCURRENT PORT: ", LOGGING_PORT)
+
+    app.run(debug=False, port=LOGGING_PORT)
