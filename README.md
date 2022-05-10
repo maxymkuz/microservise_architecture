@@ -3,15 +3,11 @@
 ### You can see the screenshots of our program in the media directory
 
 
-POST requests facade
+Three logging services logs
+![alt text](https://github.com/maxymkuz/microservise_architecture/blob/micro_hazelcast/media/Screenshot%202022-05-10%20at%2010.39.44.png)
 
-![post request to facade link](https://github.com/maxymkuz/microservise_architecture/tree/micro_basics/media/facade_service_post.jpg)
 
-GET requests facade
+Get request on facade
+![get request to facade link](https://github.com/maxymkuz/microservise_architecture/blob/micro_hazelcast/media/Screenshot%202022-05-10%20at%2010.40.26.png)
 
-![get request to facade link](https://github.com/maxymkuz/microservise_architecture/tree/micro_basics/media/facade_service_get.jpg)
-
-console of logging service of facade POST request
-
-![console logging link](https://github.com/maxymkuz/microservise_architecture/tree/micro_basics/media/logging_service_result_of_post_from_facade.jpg)
-
+##### If I disable some logging services instances, I will be able to read the full contents of distributed map as long as random makes a post to working instance
