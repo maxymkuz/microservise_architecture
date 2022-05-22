@@ -1,4 +1,5 @@
 import hazelcast
+import sys
 
 from flask import Flask, jsonify, request
 app = Flask(__name__)
@@ -42,6 +43,8 @@ def add():
 
 
 if __name__ == '__main__':
-    print("\n\nCURRENT PORT: ", LOGGING_PORT)
+    port = int(sys.argv[1])
 
-    app.run(debug=False, port=LOGGING_PORT)
+    print("\n\nCURRENT PORT: ", port)
+
+    app.run(debug=False, port=port)

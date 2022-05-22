@@ -1,13 +1,22 @@
+import hazelcast
 from flask import Flask, jsonify, request
 from pyconfig import MESSAGES_PORT
-app = Flask(__name__)
+import sys
 
+app = Flask(__name__)
+client = hazelcast.HazelcastClient()
+queue = client.get_queue("my-queue").blocking()
+data = []
 
 @app.route('/', methods=['GET'])
 def add():
-    if request.method == 'GET':
-        return "messages servise message", 200
+    while not queue.is_empty():
+        data.append(queue.take())
+        print(f"Consumed {data[-1]}")
+    return str(data)
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=MESSAGES_PORT)
+    port = int(sys.argv[1])
+
+    app.run(debug=True, port=port)
