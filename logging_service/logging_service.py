@@ -4,13 +4,29 @@ import sys
 from flask import Flask, jsonify, request
 app = Flask(__name__)
 
-LOGGING_PORT = 5005
+# consul:
+import consul
+
+
+LOGGING_PORT = int(sys.argv[1])
+
+
+
+host_name = "localhost"
+service_name = "logging_service"
+
+cs = consul.Consul(host=host_name, port=8500)
+cs.agent.service.register(service_name,
+                            port=LOGGING_PORT,
+                            service_id=f"{service_name}:{LOGGING_PORT}"
+                        )
+
 
 # Connect to Hazelcast cluster.
 client = hazelcast.HazelcastClient()
 
 # Get or create the "distributed-map" on the cluster.
-distributed_map = client.get_map("distributed-map").blocking()
+distributed_map = client.get_map(cs.kv.get("hazelcast_map")[1]["Value"].decode("utf-8")).blocking()
 
 
 def fetch_messages():

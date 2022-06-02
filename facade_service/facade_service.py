@@ -4,12 +4,43 @@ import requests
 import uuid
 from pyconfig import FACADE_PORT, MESSAGES_PORT
 import random
-LOGGING_PORTS = [5005, 5006, 5007]
-MESSAGES_PORTS = [5010, 5011]
+
 app = Flask(__name__)
 
+# consul:
+import consul
+
+host_name = "localhost"
+host_port = 9000
+service_name = "facade-service"
+
+cs = consul.Consul(host=host_name, port=8500)
+cs.agent.service.register(service_name,
+                            port=host_port,
+                            service_id=f"{service_name}:{host_port}"
+                        )
+
+
+def update_consul():
+    logging_service = []
+    message_service = []
+    for key, val in cs.agent.services().items():
+        if key.startswith("logging_service"):
+            logging_service.append(f"http://localhost:{val['Port']}")
+        elif key.startswith("messages_service"):
+            message_service.append(
+                f"http://localhost:{val['Port']}")
+    return message_service, logging_service
+
+MESSAGES_PORTS, LOGGING_PORTS = update_consul()
+
+print(LOGGING_PORTS)
+print(MESSAGES_PORTS)
+
+
 client = hazelcast.HazelcastClient()
-queue = client.get_queue("my-queue").blocking()
+
+queue = client.get_queue(cs.kv.get("hazelcast_queue")[1]["Value"].decode("utf-8")).blocking()
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -20,7 +51,7 @@ def add():
 
         try:
             logging_reqs = "logging default"
-            logging_reqs = requests.get(f'http://127.0.0.1:{logging_port}/')
+            logging_reqs = requests.get(logging_port)
         except:
             print("ERROR: Was not able to reach the", logging_port)
             return "ERROR, Didn't reach the port", logging_port
@@ -29,7 +60,7 @@ def add():
         print("senging request to MESSAGES port:", messages_port)
 
         try:
-            msgs_reqs = requests.get(f'http://127.0.0.1:{messages_port}/')
+            msgs_reqs = requests.get(messages_port)
         except:
             print("ERROR: Was not able to reach the", messages_port)
             return "ERROR, Didn't reach the port", messages_port        
@@ -55,7 +86,7 @@ def add():
         print("putted")
 
         try:
-            requests.post(f'http://127.0.0.1:{port}/',
+            requests.post(port,
                         json={'UUID': str(uuid_),
                             'msg': request.json['msg']})
             return "Message SENT"
